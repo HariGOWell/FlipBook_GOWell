@@ -15,18 +15,20 @@
         }
 
         #flipbook {
-            width: 1000px;
+            width: 1000px; /* adjust for your PDF size */
             height: 700px;
         }
 
             #flipbook .page {
                 background: white;
-                box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                box-shadow: 0 0 8px rgba(0,0,0,0.5);
             }
 
-            #flipbook canvas {
-                width: 100%;
-                height: 100%;
+            #flipbook img {
+                display: block;
+                max-width: 100%;
+                max-height: 100%;
+                margin: auto;
             }
     </style>
 </head>
@@ -49,13 +51,13 @@
       "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js";
 
     async function loadPDF() {
-      const url = "Gowell_Catalog.pdf"; // your PDF in repo
+      const url = "Gowell_Catalog.pdf";
       const pdf = await pdfjsLib.getDocument(url).promise;
       console.log("PDF loaded with", pdf.numPages, "pages");
 
-      let pages = [];
+      const flipbook = $("#flipbook");
 
-      // Render pages into images
+      // Render every page into <img> and append
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const viewport = page.getViewport({ scale: 1.5 });
@@ -65,26 +67,35 @@
         canvas.height = viewport.height;
 
         await page.render({ canvasContext: ctx, viewport }).promise;
-        pages.push(canvas.toDataURL()); // save as image
-      }
 
-      // Now build Flipbook with images
-      const flipbook = $("#flipbook");
-      pages.forEach(src => {
+        // convert to <img>
         const pageDiv = $("<div />").addClass("page");
-        const img = $("<img />").attr("src", src).css({ width: "100%", height: "100%" });
+        const img = $("<img />").attr("src", canvas.toDataURL());
         pageDiv.append(img);
         flipbook.append(pageDiv);
-      });
 
-      // Initialize Turn.js
+        console.log("Rendered page", i);
+      }
+
+      // Initialize Turn.js *after* all pages are added
       flipbook.turn({
         width: 1000,
         height: 700,
         autoCenter: true,
-        display: "double", // book style
+        display: "double",
         elevation: 50,
-        gradients: true
+        gradients: true,
+        when: {
+          turning: function(event, page) {
+            console.log("Turning to page", page);
+          }
+        }
       });
 
-      console.log("Flipbook i
+      console.log("Flipbook initialized with", pdf.numPages, "pages");
+    }
+
+    loadPDF();
+    </script>
+</body>
+</html>
