@@ -2,10 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Gowell Catalog Flipbook</title>
+    <title>Flipbook Test</title>
+
+    <!-- Basic styling -->
     <style>
         body {
             margin: 0;
+            padding: 0;
             background: #111;
             display: flex;
             justify-content: center;
@@ -14,66 +17,41 @@
         }
 
         #flipbook {
-            width: 1000px;
+            width: 800px;
             height: 600px;
         }
 
             #flipbook .page {
-                width: 500px;
+                width: 800px;
                 height: 600px;
-                background-color: white;
-                background-size: cover;
+                background: white;
+                line-height: 600px;
+                text-align: center;
+                font-size: 24px;
             }
     </style>
 </head>
 <body>
-    <div id="flipbook"></div>
 
-    <!-- jQuery -->
+    <!-- Flipbook container -->
+    <div id="flipbook">
+        <div class="page">Page 1</div>
+        <div class="page">Page 2</div>
+        <div class="page">Page 3</div>
+        <div class="page">Page 4</div>
+    </div>
+
+    <!-- jQuery (must be before turn.js) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Your Turn.js -->
+    <!-- Your local Turn.js -->
     <script src="turn.min.js"></script>
-    <!-- PDF.js for rendering PDF pages -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
 
     <script>
-        // PDF file name
-        const pdfUrl = "Gowell_Catalog.pdf";
-
-        // Load PDF and render into flipbook
-        const container = $("#flipbook");
-
-        pdfjsLib.getDocument(pdfUrl).promise.then(function (pdf) {
-            const totalPages = pdf.numPages;
-
-            // Create pages
-            for (let i = 1; i <= totalPages; i++) {
-                const pageDiv = $('<div />', { class: 'page' }).appendTo(container);
-                renderPage(pdf, i, pageDiv[0]);
-            }
-
-            // Initialize flipbook AFTER pages are created
-            container.turn({
-                width: 1000,
-                height: 600,
-                autoCenter: true
-            });
+        $("#flipbook").turn({
+            width: 800,
+            height: 600,
+            autoCenter: true
         });
-
-        // Render PDF page into canvas
-        function renderPage(pdf, num, div) {
-            pdf.getPage(num).then(function (page) {
-                const viewport = page.getViewport({ scale: 2 });
-                const canvas = document.createElement("canvas");
-                const ctx = canvas.getContext("2d");
-
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-
-                page.render({ canvasContext: ctx, viewport: viewport });
-                div.appendChild(canvas);
-            });
-        }
     </script>
 </body>
 </html>
