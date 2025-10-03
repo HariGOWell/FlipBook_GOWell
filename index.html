@@ -2,80 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Flipbook Test</title>
-    <link rel="stylesheet" href="https://unpkg.com/stpageflip/dist/pageflip.css" />
+    <title>PDF Image Test</title>
     <style>
         body {
-            margin: 0;
             background: #111;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            color: white;
         }
 
-        #flipbook {
-            width: 90%;
-            height: 90%;
+        img {
+            display: block;
+            margin: 20px auto;
+            border: 1px solid white;
         }
     </style>
 </head>
 <body>
-    <div id="flipbook"></div>
+    <h2>Rendered PDF Pages as Images</h2>
+    <div id="output"></div>
 
     <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
-    <!-- StPageFlip -->
-    <script src="https://unpkg.com/stpageflip/dist/pageflip.min.js"></script>
-
     <script>
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js';
 
-    const pdfUrl = "Gowell_Catalog.pdf";  // case-sensitive!
+    const pdfUrl = "Gowell_Catalog.pdf";
 
-    async function initFlipbook() {
+    async function renderPDF() {
       try {
-        console.log("Loading PDF:", pdfUrl);
         const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
         console.log("✅ PDF loaded, total pages:", pdf.numPages);
 
-        let pages = [];
-
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: 1.5 });
+          const viewport = page.getViewport({ scale: 1 });
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
           canvas.width = viewport.width;
           canvas.height = viewport.height;
-
           await page.render({ canvasContext: ctx, viewport }).promise;
-          pages.push(canvas.toDataURL("image/png"));
+
+          // Show image on page
+          const img = document.createElement("img");
+          img.src = canvas.toDataURL("image/png");
+          document.getElementById("output").appendChild(img);
         }
-
-        console.log("✅ All pages rendered:", pages.length);
-
-        // Initialize Flipbook
-        const flipbook = new St.PageFlip(document.getElementById("flipbook"), {
-          width: 800,
-          height: 600,
-          size: "stretch",
-          showCover: false,
-          mobileScrollSupport: true,
-          usePortrait: true,
-          flippingTime: 700
-        });
-
-        flipbook.loadFromImages(pages);
       } catch (err) {
-        console.error("❌ Flipbook error:", err);
-        alert("⚠️ Flipbook failed: " + err.message);
+        console.error("❌ PDF error:", err);
+        alert("⚠️ PDF Render Failed: " + err.message);
       }
     }
 
-    initFlipbook();
+    renderPDF();
     </script>
 </body>
 </html>
