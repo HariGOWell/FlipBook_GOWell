@@ -1,9 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>StPageFlip Test</title>
+    <title>Flipbook Test</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/stpageflip@2.0.7/dist/css/pageflip.css" />
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #flipbook {
+            width: 90%;
+            height: 90%;
+        }
+
+        .page img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    </style>
 </head>
 <body>
     <div id="flipbook">
@@ -13,12 +34,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/stpageflip@2.0.7/dist/js/pageflip.browser.min.js"></script>
     <script>
-    console.log("St object:", window.St); // ✅ should NOT be undefined
+    console.log("St object:", window.St);
 
     const flipbook = new St.PageFlip(document.getElementById("flipbook"), {
       width: 400,
-      height: 600
+      height: 600,
+      showCover: false
     });
+
     flipbook.loadFromHTML(document.querySelectorAll("#flipbook .page"));
     </script>
 </body>
