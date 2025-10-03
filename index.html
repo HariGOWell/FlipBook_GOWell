@@ -1,73 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>PDF Flipbook</title>
-    <link rel="stylesheet" href="https://unpkg.com/stpageflip/dist/pageflip.css" />
-    <style>
-        body {
-            margin: 0;
-            background: #111;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+<script>
+  const pdfjsLib = window['pdfjs-dist/build/pdf'];
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js';
 
-        #flipbook {
-            width: 90%;
-            height: 90%;
-        }
+  const pdfUrl = "Gowell_Catalog.pdf";
 
-        .page img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-    </style>
-</head>
-<body>
-    <div id="flipbook"></div>
+  async function initFlipbook() {
+    try {
+      const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+      console.log("✅ PDF loaded, total pages:", pdf.numPages);
 
-    <!-- PDF.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
-    <!-- StPageFlip -->
-    <script src="https://unpkg.com/stpageflip/dist/pageflip.browser.min.js"></script>
+      // Render pages into an array of <div class="page">
+      const tempPages = [];
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale: 1.2 });
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: ctx, viewport }).promise;
 
-    <script>
-    const pdfjsLib = window['pdfjs-dist/build/pdf'];
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js';
+        const pageDiv = document.createElement("div");
+        pageDiv.classList.add("page");
+        pageDiv.innerHTML = `<img src="${canvas.toDataURL("image/png")}" />`;
+        tempPages.push(pageDiv);
+      }
 
-    const pdfUrl = "Gowell_Catalog.pdf";
-
-    async function initFlipbook() {
-      try {
-        const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
-        console.log("✅ PDF loaded, total pages:", pdf.numPages);
-
-        const flipbookEl = document.getElementById("flipbook");
-
-        // Render PDF pages into hidden container
-        const tempPages = [];
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: 1.2 });
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
-
-          await page.render({ canvasContext: ctx, viewport }).promise;
-
-          const pageDiv = document.createElement("div");
-          pageDiv.classList.add("page");
-          pageDiv.innerHTML = `<img src="${canvas.toDataURL("image/png")}" />`;
-          tempPages.push(pageDiv);
-        }
-
-        // ✅ Initialize Flipbook
-        const flipbook = new St.PageFlip(flipbookEl, {
+      // ✅ Only now create the flipbook
+      const flipbook = new St.PageFlip(
+        document.getElementById("flipbook"),
+        {
           width: 800,
           height: 600,
           size: "stretch",
@@ -75,19 +38,18 @@
           mobileScrollSupport: true,
           usePortrait: true,
           flippingTime: 800
-        });
+        }
+      );
 
-        // Load rendered pages
-        flipbook.loadFromHTML(tempPages);
+      // ✅ Load rendered pages into the flipbook
+      flipbook.loadFromHTML(tempPages);
 
-        console.log("✅ Flipbook initialized with", pdf.numPages, "pages");
-      } catch (err) {
-        console.error("❌ Flipbook error:", err);
-        alert("⚠️ Flipbook failed: " + err.message);
-      }
+      console.log("✅ Flipbook initialized with", tempPages.length, "pages");
+    } catch (err) {
+      console.error("❌ Flipbook error:", err);
+      alert("⚠️ Flipbook failed: " + err.message);
     }
+  }
 
-    initFlipbook();
-    </script>
-</body>
-</html>
+  initFlipbook();
+</script>
