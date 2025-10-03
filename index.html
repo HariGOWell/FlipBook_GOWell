@@ -15,7 +15,7 @@
         }
 
         #flipbook {
-            width: 1000px; /* adjust for your PDF size */
+            width: 1000px;
             height: 700px;
         }
 
@@ -53,49 +53,52 @@
     async function loadPDF() {
       const url = "Gowell_Catalog.pdf";
       const pdf = await pdfjsLib.getDocument(url).promise;
-      console.log("PDF loaded with", pdf.numPages, "pages");
+      console.log("✅ PDF loaded with", pdf.numPages, "pages");
 
       const flipbook = $("#flipbook");
+      let pages = [];
 
-      // Render every page into <img> and append
+      // Render every PDF page into an image (base64)
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 1.5 });
+        const viewport = page.getViewport({ scale: 1.2 });
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         canvas.width = viewport.width;
         canvas.height = viewport.height;
 
         await page.render({ canvasContext: ctx, viewport }).promise;
-
-        // convert to <img>
-        const pageDiv = $("<div />").addClass("page");
         const img = $("<img />").attr("src", canvas.toDataURL());
-        pageDiv.append(img);
-        flipbook.append(pageDiv);
-
-        console.log("Rendered page", i);
+        pages.push(img);
+        console.log("✅ Rendered page", i);
       }
 
-      // Initialize Turn.js *after* all pages are added
+      // Append all pages AFTER they’re rendered
+      pages.forEach(img => {
+        const pageDiv = $("<div />").addClass("page");
+        pageDiv.append(img);
+        flipbook.append(pageDiv);
+      });
+
+      console.log("✅ Pages appended, initializing Turn.js...");
+
+      // Initialize Turn.js only once, after pages exist
       flipbook.turn({
         width: 1000,
         height: 700,
         autoCenter: true,
         display: "double",
         elevation: 50,
-        gradients: true,
-        when: {
-          turning: function(event, page) {
-            console.log("Turning to page", page);
-          }
-        }
+        gradients: true
       });
 
-      console.log("Flipbook initialized with", pdf.numPages, "pages");
+      console.log("✅ Flipbook initialized with", pages.length, "pages");
     }
 
-    loadPDF();
+    loadPDF().catch(err => {
+      console.error("❌ PDF load error:", err);
+      alert("Error loading PDF: " + err.message);
+    });
     </script>
 </body>
 </html>
