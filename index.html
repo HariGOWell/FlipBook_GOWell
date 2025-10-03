@@ -46,7 +46,7 @@
         pageContainer.classList.add("page-container");
         flipbookEl.appendChild(pageContainer);
 
-        // Render pages into DIVs
+        // Render PDF pages into <div class="page">
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const viewport = page.getViewport({ scale: 1.2 });
@@ -57,7 +57,34 @@
 
           await page.render({ canvasContext: ctx, viewport }).promise;
 
-          // Wrap each page in a div for PageFlip
           const pageDiv = document.createElement("div");
           pageDiv.classList.add("page");
-          pageDiv.innerHTML = `<img src="${canvas.toDataURL("ima
+          pageDiv.innerHTML = `<img src="${canvas.toDataURL("image/png")}" style="width:100%; height:100%; object-fit:contain;">`;
+
+          pageContainer.appendChild(pageDiv);
+        }
+
+        // ✅ Correct: use St.PageFlip
+        const flipbook = new St.PageFlip(flipbookEl, {
+          width: 800,
+          height: 600,
+          size: "stretch",
+          showCover: false,
+          mobileScrollSupport: true,
+          usePortrait: true,
+          flippingTime: 800
+        });
+
+        flipbook.loadFromHTML(document.querySelectorAll(".page-container .page"));
+
+        console.log("✅ Flipbook initialized with", pdf.numPages, "pages");
+      } catch (err) {
+        console.error("❌ Flipbook error:", err);
+        alert("⚠️ Flipbook failed: " + err.message);
+      }
+    }
+
+    initFlipbook();
+    </script>
+</body>
+</html>
