@@ -22,13 +22,14 @@
                 width: 400px;
                 height: 600px;
                 background: white;
+                overflow: hidden;
             }
 
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
+            #flipbook canvas {
+                width: 100%;
+                height: 100%;
+                display: block;
+            }
     </style>
 
     <!-- jQuery -->
@@ -44,14 +45,45 @@
     <div id="flipbook"></div>
 
     <script>
-    const url = "Gowell_Catalog.pdf"; // Your PDF file
+    const url = "Gowell_Catalog.pdf"; // your PDF file
 
     async function loadPDF() {
       const pdf = await pdfjsLib.getDocument(url).promise;
       console.log("PDF loaded with", pdf.numPages, "pages");
 
-      const pages = [];
+      const flipbook = document.getElementById("flipbook");
 
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
-        const viewport = page.getV
+        const viewport = page.getViewport({ scale: 1.2 });
+
+        // create canvas for each page
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        await page.render({ canvasContext: context, viewport }).promise;
+
+        // wrap in page div
+        const pageDiv = document.createElement("div");
+        pageDiv.className = "page";
+        pageDiv.appendChild(canvas);
+        flipbook.appendChild(pageDiv);
+      }
+
+      // 🔥 initialize Turn.js AFTER all pages are added
+      $("#flipbook").turn({
+        width: 800,
+        height: 600,
+        autoCenter: true,
+        display: "double",
+        elevation: 50,
+        gradients: true
+      });
+    }
+
+    loadPDF();
+    </script>
+</body>
+</html>
