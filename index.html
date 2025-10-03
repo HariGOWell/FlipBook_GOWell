@@ -2,8 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Test StPageFlip</title>
-    <link rel="stylesheet" href="https://unpkg.com/stpageflip/dist/pageflip.css" />
+    <title>StPageFlip Test</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/stpageflip@2.0.7/dist/css/pageflip.css" />
 </head>
 <body>
     <div id="flipbook">
@@ -11,9 +11,9 @@
         <div class="page"><img src="https://picsum.photos/400/600?random=2"></div>
     </div>
 
-    <script src="https://unpkg.com/stpageflip/dist/pageflip.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stpageflip@2.0.7/dist/js/pageflip.browser.min.js"></script>
     <script>
-    console.log("St object:", window.St); // ✅ should print object
+    console.log("St object:", window.St); // ✅ should NOT be undefined
 
     const flipbook = new St.PageFlip(document.getElementById("flipbook"), {
       width: 400,
