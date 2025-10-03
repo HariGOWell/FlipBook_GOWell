@@ -2,56 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Flipbook Test</title>
-    <style>
-        body {
-            background: #111;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        #flipbook {
-            width: 800px;
-            height: 600px;
-        }
-
-            #flipbook .page {
-                width: 400px;
-                height: 600px;
-                background: white;
-                text-align: center;
-                line-height: 600px;
-                font-size: 40px;
-                box-shadow: 0 0 8px rgba(0,0,0,0.5);
-            }
-    </style>
+    <title>Turn.js Debug Test</title>
 </head>
 <body>
-    <div id="flipbook">
-        <div class="page">Page 1</div>
-        <div class="page">Page 2</div>
-        <div class="page">Page 3</div>
-        <div class="page">Page 4</div>
-    </div>
+    <h1>Turn.js Debug</h1>
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- ✅ Official Turn.js from CDN -->
+    <!-- Official Turn.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
 
     <script>
-    $(function(){
-      console.log("Turn.js loaded?", typeof $.fn.turn); // should say "function"
-      $("#flipbook").turn({
-        width: 800,
-        height: 600,
-        autoCenter: true,
-        display: "double"  // shows 2-page spread
-      });
-    });
+    console.log("jQuery version:", $.fn.jquery);
+    console.log("Turn.js exists?", typeof $.fn.turn);
     </script>
 </body>
 </html>
