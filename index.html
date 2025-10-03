@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Flipbook PDF Viewer</title>
+    <title>Flipbook with Turn.js</title>
+    <link rel="stylesheet" href="turn.min.css">
     <style>
         body {
             margin: 0;
@@ -18,56 +19,62 @@
             height: 90%;
         }
 
+            #flipbook .page {
+                background: white;
+            }
+
         canvas {
             width: 100%;
-            height: auto;
+            height: 100%;
         }
     </style>
-
-    <!-- jQuery (needed for Turn.js) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- Turn.js (flipbook library) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
-
-    <!-- PDF.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
 </head>
 <body>
     <div id="flipbook"></div>
 
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js"></script>
+
+    <!-- Turn.js -->
+    <script src="turn.min.js"></script>
+
     <script>
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
     pdfjsLib.GlobalWorkerOptions.workerSrc =
-      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js";
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js';
 
     async function loadPDF() {
       const pdf = await pdfjsLib.getDocument("Gowell_Catalog.pdf").promise;
-      const flipbook = $("#flipbook");
+      let pages = [];
 
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const viewport = page.getViewport({ scale: 1.5 });
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
-        canvas.height = viewport.height;
         canvas.width = viewport.width;
-
+        canvas.height = viewport.height;
         await page.render({ canvasContext: ctx, viewport }).promise;
-
-        const pageDiv = document.createElement("div");
-        pageDiv.className = "page";
-        pageDiv.appendChild(canvas);
-        flipbook.append(pageDiv);
+        pages.push(canvas.toDataURL());
       }
 
-      // Initialize flipbook AFTER pages are added
-      flipbook.turn({
-        width: 1000,
-        height: 700,
-        autoCenter: true,
-        gradients: true,
-        acceleration: true
+      // Init Turn.js
+      const flipbook = document.getElementById("flipbook");
+      pages.forEach(src => {
+        const pageDiv = document.createElement("div");
+        const img = document.createElement("img");
+        img.src = src;
+        img.style.width = "100%";
+        img.style.height = "100%";
+        pageDiv.appendChild(img);
+        flipbook.appendChild(pageDiv);
+      });
+
+      $("#flipbook").turn({
+        width: 800,
+        height: 600,
+        autoCenter: true
       });
     }
 
