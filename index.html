@@ -91,6 +91,21 @@
     }
 
     initFlipbook();
+    <script>
+  async function initFlipbook() {
+    // ... your PDF + flipbook code ...
+  }
+
+  initFlipbook();
+
+  // Debug logs
+  console.log("Flipbook starting...");
+
+  window.onerror = function(message, source, lineno, colno, error) {
+    console.log("⚠️ JS Error:", message, "at line", lineno);
+  };
     </script>
+
+
 </body>
 </html>
