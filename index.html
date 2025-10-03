@@ -2,19 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Turn.js Debug Test</title>
+    <title>StPageFlip Example</title>
+    <link rel="stylesheet" href="https://unpkg.com/stpageflip/dist/pageflip.css">
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #flipbook {
+            width: 1000px;
+            height: 600px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Turn.js Debug</h1>
+    <div id="flipbook"></div>
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Official Turn.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
-
+    <script src="https://unpkg.com/stpageflip/dist/pageflip.min.js"></script>
     <script>
-    console.log("jQuery version:", $.fn.jquery);
-    console.log("Turn.js exists?", typeof $.fn.turn);
+    document.addEventListener("DOMContentLoaded", () => {
+      const pageFlip = new St.PageFlip(document.getElementById("flipbook"), {
+        width: 400, height: 600, showCover: true, size: "stretch"
+      });
+
+      pageFlip.loadFromImages([
+        "https://picsum.photos/400/600?1",
+        "https://picsum.photos/400/600?2",
+        "https://picsum.photos/400/600?3",
+        "https://picsum.photos/400/600?4"
+      ]);
+    });
     </script>
 </body>
 </html>
