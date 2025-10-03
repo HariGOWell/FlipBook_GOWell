@@ -1,2 +1,45 @@
-<link rel="stylesheet" href="pageflip.css" />
-<script src="pageflip.browser.min.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <title>Flipbook Test</title>
+    <link rel="stylesheet" href="pageflip.css" />
+</head>
+<body style="background:#111; margin:0;">
+
+    <div id="flipbook"></div>
+
+    <script src="pageflip.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
+    <script>
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js';
+
+    async function initFlipbook() {
+      const pdf = await pdfjsLib.getDocument("Gowell_Catalog.pdf").promise;
+      let pages = [];
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        pages.push(canvas.toDataURL());
+      }
+
+      console.log("Total pages:", pages.length);
+
+      // use your local PageFlip
+      const flipbook = new St.PageFlip(document.getElementById("flipbook"), {
+        width: 800,
+        height: 600
+      });
+
+      flipbook.loadFromImages(pages);
+    }
+
+    initFlipbook();
+    </script>
+</body>
