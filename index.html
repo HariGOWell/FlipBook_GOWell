@@ -25,6 +25,7 @@
                 text-align: center;
                 line-height: 600px;
                 font-size: 40px;
+                box-shadow: 0 0 8px rgba(0,0,0,0.5);
             }
     </style>
 </head>
@@ -38,17 +39,17 @@
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- ✅ Guaranteed Turn.js -->
+    <!-- ✅ Official Turn.js from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
 
     <script>
     $(function(){
-      console.log("Turn.js loaded?", typeof $.fn.turn);
+      console.log("Turn.js loaded?", typeof $.fn.turn); // should say "function"
       $("#flipbook").turn({
         width: 800,
         height: 600,
         autoCenter: true,
-        display: "double"
+        display: "double"  // shows 2-page spread
       });
     });
     </script>
