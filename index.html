@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Turn.js Flipbook Test</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+    <title>PDF Flipbook</title>
+    <link rel="stylesheet" href="https://unpkg.com/stpageflip/dist/pageflip.css" />
     <style>
         body {
+            margin: 0;
             background: #111;
             display: flex;
             justify-content: center;
@@ -15,37 +15,41 @@
         }
 
         #flipbook {
-            width: 800px;
-            height: 500px;
+            width: 80%;
+            height: 90%;
         }
-
-            #flipbook .page {
-                width: 400px;
-                height: 500px;
-                background: white;
-                line-height: 500px;
-                text-align: center;
-                font-size: 24px;
-                border: 1px solid #ccc;
-            }
     </style>
 </head>
 <body>
-    <div id="flipbook">
-        <div class="page">Page 1</div>
-        <div class="page">Page 2</div>
-        <div class="page">Page 3</div>
-        <div class="page">Page 4</div>
-    </div>
-
+    <div id="flipbook"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
+    <script src="https://unpkg.com/stpageflip/dist/pageflip.min.js"></script>
     <script>
-    $(document).ready(function(){
-      $("#flipbook").turn({
-        width: 800,
-        height: 500,
-        autoCenter: true
-      });
-    });
+    const pdfUrl = 'Gowell_Catalog.pdf';
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js';
+
+    async function buildFlipbook() {
+      const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+      const pages = [];
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        pages.push(canvas.toDataURL());
+      }
+      const flipbook = new St.PageFlip(
+        document.getElementById('flipbook'),
+        { width: 800, height: 600, showCover: true, usePortrait: true }
+      );
+      flipbook.loadFromImages(pages);
+    }
+    buildFlipbook();
     </script>
 </body>
 </html>
