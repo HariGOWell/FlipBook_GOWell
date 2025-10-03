@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Flipbook Test</title>
+    <title>PDF Flipbook</title>
     <link rel="stylesheet" href="https://unpkg.com/stpageflip/dist/pageflip.css" />
     <style>
         body {
@@ -33,16 +33,20 @@
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js';
 
-    const pdfUrl = "Gowell_Catalog.pdf"; // must match exactly!
+    const pdfUrl = "Gowell_Catalog.pdf";
 
     async function initFlipbook() {
       try {
-        console.log("Loading PDF:", pdfUrl);
         const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
         console.log("✅ PDF loaded, total pages:", pdf.numPages);
 
-        let pages = [];
+        // Setup container
+        const flipbookEl = document.getElementById("flipbook");
+        const pageContainer = document.createElement("div");
+        pageContainer.classList.add("page-container");
+        flipbookEl.appendChild(pageContainer);
 
+        // Render pages into DIVs
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const viewport = page.getViewport({ scale: 1.2 });
@@ -52,30 +56,8 @@
           canvas.height = viewport.height;
 
           await page.render({ canvasContext: ctx, viewport }).promise;
-          pages.push(canvas.toDataURL("image/png"));
-        }
 
-        console.log("✅ All pages rendered:", pages.length);
-
-        // FIX: use PageFlip global directly
-        const flipbook = new window.PageFlip(document.getElementById("flipbook"), {
-          width: 800,
-          height: 600,
-          size: "stretch",
-          showCover: false,
-          mobileScrollSupport: true,
-          usePortrait: true,
-          flippingTime: 700
-        });
-
-        flipbook.loadFromImages(pages);
-      } catch (err) {
-        console.error("❌ Flipbook error:", err);
-        alert("⚠️ Flipbook failed: " + err.message);
-      }
-    }
-
-    initFlipbook();
-    </script>
-</body>
-</html>
+          // Wrap each page in a div for PageFlip
+          const pageDiv = document.createElement("div");
+          pageDiv.classList.add("page");
+          pageDiv.innerHTML = `<img src="${canvas.toDataURL("ima
