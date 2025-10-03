@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Flipbook Demo</title>
+    <title>StPageFlip Test</title>
     <link rel="stylesheet" href="https://unpkg.com/stpageflip/dist/pageflip.css" />
     <style>
         body {
@@ -30,12 +30,17 @@
     <div id="flipbook">
         <div class="page"><img src="https://picsum.photos/600/800?random=1"></div>
         <div class="page"><img src="https://picsum.photos/600/800?random=2"></div>
+        <div class="page"><img src="https://picsum.photos/600/800?random=3"></div>
     </div>
 
     <script src="https://unpkg.com/stpageflip/dist/pageflip.browser.min.js"></script>
     <script>
+    // ✅ if library loads correctly, St will exist
+    console.log("St object:", window.St);
+
     const flipbook = new St.PageFlip(
-      document.getElementById("flipbook"), {
+      document.getElementById("flipbook"),
+      {
         width: 600,
         height: 800,
         size: "stretch",
@@ -43,6 +48,7 @@
         mobileScrollSupport: true
       }
     );
+
     flipbook.loadFromHTML(document.querySelectorAll("#flipbook .page"));
     </script>
 </body>
