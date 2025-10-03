@@ -1,104 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Flipbook PDF Viewer</title>
-    <link rel="stylesheet" href="turn.min.css">
-    <style>
-        body {
-            margin: 0;
-            background: #111;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+<div id="flipbook">
+    <div class="page"><img src="https://picsum.photos/600/800?1"></div>
+    <div class="page"><img src="https://picsum.photos/600/800?2"></div>
+    <div class="page"><img src="https://picsum.photos/600/800?3"></div>
+</div>
 
-        #flipbook {
-            width: 1000px;
-            height: 700px;
-        }
-
-            #flipbook .page {
-                background: white;
-                box-shadow: 0 0 8px rgba(0,0,0,0.5);
-            }
-
-            #flipbook img {
-                display: block;
-                max-width: 100%;
-                max-height: 100%;
-                margin: auto;
-            }
-    </style>
-</head>
-<body>
-    <div id="flipbook"></div>
-
-    <!-- PDF.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js"></script>
-
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- Turn.js -->
-    <script src="turn.min.js"></script>
-
-    <script>
-    const pdfjsLib = window['pdfjs-dist/build/pdf'];
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js";
-
-    async function loadPDF() {
-      const url = "Gowell_Catalog.pdf";
-      const pdf = await pdfjsLib.getDocument(url).promise;
-      console.log("✅ PDF loaded with", pdf.numPages, "pages");
-
-      const flipbook = $("#flipbook");
-      let pages = [];
-
-      // Render every PDF page into an image (base64)
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 1.2 });
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-
-        await page.render({ canvasContext: ctx, viewport }).promise;
-        const img = $("<img />").attr("src", canvas.toDataURL());
-        pages.push(img);
-        console.log("✅ Rendered page", i);
-      }
-
-      // Append all pages AFTER they’re rendered
-      pages.forEach(img => {
-        const pageDiv = $("<div />").addClass("page");
-        pageDiv.append(img);
-        flipbook.append(pageDiv);
-      });
-
-      console.log("✅ Pages appended, initializing Turn.js...");
-
-      // Initialize Turn.js only once, after pages exist
-      flipbook.turn({
-        width: 1000,
-        height: 700,
-        autoCenter: true,
-        display: "double",
-        elevation: 50,
-        gradients: true
-      });
-
-      console.log("✅ Flipbook initialized with", pages.length, "pages");
-    }
-
-    loadPDF().catch(err => {
-      console.error("❌ PDF load error:", err);
-      alert("Error loading PDF: " + err.message);
-    });
-    </script>
-</body>
-</html>
+<script>
+  $("#flipbook").turn({
+    width: 1000,
+    height: 700,
+    autoCenter: true,
+    display: "double"
+  });
+</script>
