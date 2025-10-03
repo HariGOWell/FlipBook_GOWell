@@ -1,55 +1,25 @@
-<script>
-  const pdfjsLib = window['pdfjs-dist/build/pdf'];
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js';
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test StPageFlip</title>
+    <link rel="stylesheet" href="https://unpkg.com/stpageflip/dist/pageflip.css" />
+</head>
+<body>
+    <div id="flipbook">
+        <div class="page"><img src="https://picsum.photos/400/600?random=1"></div>
+        <div class="page"><img src="https://picsum.photos/400/600?random=2"></div>
+    </div>
 
-  const pdfUrl = "Gowell_Catalog.pdf";
+    <script src="https://unpkg.com/stpageflip/dist/pageflip.browser.min.js"></script>
+    <script>
+    console.log("St object:", window.St); // ✅ should print object
 
-  async function initFlipbook() {
-    try {
-      const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
-      console.log("✅ PDF loaded, total pages:", pdf.numPages);
-
-      // Render pages into an array of <div class="page">
-      const tempPages = [];
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 1.2 });
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        await page.render({ canvasContext: ctx, viewport }).promise;
-
-        const pageDiv = document.createElement("div");
-        pageDiv.classList.add("page");
-        pageDiv.innerHTML = `<img src="${canvas.toDataURL("image/png")}" />`;
-        tempPages.push(pageDiv);
-      }
-
-      // ✅ Only now create the flipbook
-      const flipbook = new St.PageFlip(
-        document.getElementById("flipbook"),
-        {
-          width: 800,
-          height: 600,
-          size: "stretch",
-          showCover: false,
-          mobileScrollSupport: true,
-          usePortrait: true,
-          flippingTime: 800
-        }
-      );
-
-      // ✅ Load rendered pages into the flipbook
-      flipbook.loadFromHTML(tempPages);
-
-      console.log("✅ Flipbook initialized with", tempPages.length, "pages");
-    } catch (err) {
-      console.error("❌ Flipbook error:", err);
-      alert("⚠️ Flipbook failed: " + err.message);
-    }
-  }
-
-  initFlipbook();
-</script>
+    const flipbook = new St.PageFlip(document.getElementById("flipbook"), {
+      width: 400,
+      height: 600
+    });
+    flipbook.loadFromHTML(document.querySelectorAll("#flipbook .page"));
+    </script>
+</body>
+</html>
