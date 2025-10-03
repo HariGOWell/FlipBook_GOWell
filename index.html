@@ -45,42 +45,52 @@
     <div id="flipbook"></div>
 
     <script>
+    // ✅ Force PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js";
+
     const url = "Gowell_Catalog.pdf"; // your PDF file
 
     async function loadPDF() {
-      const pdf = await pdfjsLib.getDocument(url).promise;
-      console.log("PDF loaded with", pdf.numPages, "pages");
+      try {
+        const pdf = await pdfjsLib.getDocument(url).promise;
+        console.log("✅ PDF loaded with", pdf.numPages, "pages");
 
-      const flipbook = document.getElementById("flipbook");
+        const flipbook = document.getElementById("flipbook");
 
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 1.2 });
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 1.5 }); // bigger scale
 
-        // create canvas for each page
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+          // create canvas for each page
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
 
-        await page.render({ canvasContext: context, viewport }).promise;
+          await page.render({ canvasContext: context, viewport }).promise;
+          console.log("✅ Rendered page", i);
 
-        // wrap in page div
-        const pageDiv = document.createElement("div");
-        pageDiv.className = "page";
-        pageDiv.appendChild(canvas);
-        flipbook.appendChild(pageDiv);
+          // wrap in page div
+          const pageDiv = document.createElement("div");
+          pageDiv.className = "page";
+          pageDiv.appendChild(canvas);
+          flipbook.appendChild(pageDiv);
+        }
+
+        // 🔥 Initialize Turn.js AFTER all pages are loaded
+        $("#flipbook").turn({
+          width: 800,
+          height: 600,
+          autoCenter: true,
+          display: "double",
+          elevation: 50,
+          gradients: true
+        });
+
+        console.log("✅ Turn.js initialized");
+      } catch (err) {
+        console.error("❌ Error loading PDF:", err);
       }
-
-      // 🔥 initialize Turn.js AFTER all pages are added
-      $("#flipbook").turn({
-        width: 800,
-        height: 600,
-        autoCenter: true,
-        display: "double",
-        elevation: 50,
-        gradients: true
-      });
     }
 
     loadPDF();
