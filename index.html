@@ -1,11 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Flipbook Test</title>
+    <title>Flipbook PDF Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
 
-    <!-- Load local CSS and JS (instead of broken CDN) -->
-    <link rel="stylesheet" href="pageflip.css">
-    <script src="pageflip.browser.min.js"></script>
+        #flipbook {
+            width: 80%;
+            height: 90%;
+        }
 
-    <!-- PDF.js (from CDN is fine) -->
+        canvas {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+
+    <!-- jQuery (needed for Turn.js) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Turn.js (flipbook library) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+
+    <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
 </head>
+<body>
+    <div id="flipbook"></div>
+
+    <script>
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js";
+
+    async function loadPDF() {
+      const pdf = await pdfjsLib.getDocument("Gowell_Catalog.pdf").promise;
+      const flipbook = $("#flipbook");
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        await page.render({ canvasContext: ctx, viewport }).promise;
+
+        const pageDiv = document.createElement("div");
+        pageDiv.className = "page";
+        pageDiv.appendChild(canvas);
+        flipbook.append(pageDiv);
+      }
+
+      // Initialize flipbook AFTER pages are added
+      flipbook.turn({
+        width: 1000,
+        height: 700,
+        autoCenter: true,
+        gradients: true,
+        acceleration: true
+      });
+    }
+
+    loadPDF();
+    </script>
+</body>
+</html>
