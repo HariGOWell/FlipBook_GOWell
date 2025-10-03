@@ -15,8 +15,8 @@
         }
 
         #flipbook {
-            width: 90%;
-            height: 90%;
+            width: 1000px;
+            height: 700px;
         }
 
             #flipbook .page {
@@ -49,13 +49,13 @@
       "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js";
 
     async function loadPDF() {
-      const url = "Gowell_Catalog.pdf"; // must be in repo
+      const url = "Gowell_Catalog.pdf"; // your PDF in repo
       const pdf = await pdfjsLib.getDocument(url).promise;
       console.log("PDF loaded with", pdf.numPages, "pages");
 
-      const flipbook = document.getElementById("flipbook");
+      let pages = [];
 
-      // Render each page as canvas
+      // Render pages into images
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const viewport = page.getViewport({ scale: 1.5 });
@@ -65,30 +65,26 @@
         canvas.height = viewport.height;
 
         await page.render({ canvasContext: ctx, viewport }).promise;
-
-        // Wrap canvas in div.page
-        const pageDiv = document.createElement("div");
-        pageDiv.className = "page";
-        pageDiv.appendChild(canvas);
-        flipbook.appendChild(pageDiv);
-
-        console.log("Rendered page", i);
+        pages.push(canvas.toDataURL()); // save as image
       }
 
-      // Initialize Turn.js AFTER pages are loaded
-      $("#flipbook").turn({
+      // Now build Flipbook with images
+      const flipbook = $("#flipbook");
+      pages.forEach(src => {
+        const pageDiv = $("<div />").addClass("page");
+        const img = $("<img />").attr("src", src).css({ width: "100%", height: "100%" });
+        pageDiv.append(img);
+        flipbook.append(pageDiv);
+      });
+
+      // Initialize Turn.js
+      flipbook.turn({
         width: 1000,
         height: 700,
         autoCenter: true,
-        gradients: true,
+        display: "double", // book style
         elevation: 50,
-        display: "double" // two-page view like book
+        gradients: true
       });
 
-      console.log("Flipbook initialized!");
-    }
-
-    loadPDF();
-    </script>
-</body>
-</html>
+      console.log("Flipbook i
