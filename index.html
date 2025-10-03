@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>GOWell Flipbook</title>
-
+    <title>Flipbook Viewer</title>
     <link rel="stylesheet" href="https://unpkg.com/stpageflip/dist/pageflip.css" />
     <style>
         body {
@@ -13,43 +12,20 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow: hidden;
         }
 
         #flipbook {
             width: 90%;
             height: 90%;
         }
-
-        .nav-btn {
-            position: fixed;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            font-size: 2rem;
-            padding: 10px;
-            cursor: pointer;
-            z-index: 1000;
-            border-radius: 50%;
-        }
-
-        #prevBtn {
-            left: 15px;
-        }
-
-        #nextBtn {
-            right: 15px;
-        }
     </style>
 </head>
 <body>
-    <button id="prevBtn" class="nav-btn">⬅</button>
     <div id="flipbook"></div>
-    <button id="nextBtn" class="nav-btn">➡</button>
 
+    <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
+    <!-- StPageFlip -->
     <script src="https://unpkg.com/stpageflip/dist/pageflip.min.js"></script>
 
     <script>
@@ -57,55 +33,43 @@
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js';
 
-    const pdfUrl = "Gowell_Catalog.pdf"; // exact name match
-    let flipbook;
+    // ✅ Must match exact filename
+    const pdfUrl = "Gowell_Catalog.pdf";
 
     async function initFlipbook() {
       console.log("Loading PDF:", pdfUrl);
       const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
-      let images = [];
+      let pages = [];
 
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 1.2 });
+        const viewport = page.getViewport({ scale: 1.5 });
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
-        canvas.width = viewport.width;
         canvas.height = viewport.height;
+        canvas.width = viewport.width;
         await page.render({ canvasContext: ctx, viewport }).promise;
-        images.push(canvas.toDataURL("image/png"));
+        pages.push(canvas.toDataURL());
       }
 
-      console.log("Total pages rendered:", images.length);
+      console.log("PDF pages rendered:", pages.length);
 
-      flipbook = new St.PageFlip(document.getElementById("flipbook"), {
-        width: 600, height: 800,
-        size: "stretch", autoSize: true,
-        usePortrait: true, flippingTime: 800
+      const flipbook = new St.PageFlip(document.getElementById("flipbook"), {
+        width: 800,
+        height: 600,
+        size: "stretch",
+        showCover: true,
+        mobileScrollSupport: true, // ✅ mobile touch enabled
+        autoSize: true
       });
 
-      flipbook.loadFromImages(images);
-
-      document.getElementById("prevBtn").onclick = () => flipbook.turnToPrevPage();
-      document.getElementById("nextBtn").onclick = () => flipbook.turnToNextPage();
+      flipbook.loadFromImages(pages);
     }
 
-    initFlipbook();
-    <script>
-  async function initFlipbook() {
-    // ... your PDF + flipbook code ...
-  }
-
-  initFlipbook();
-
-  // Debug logs
-  console.log("Flipbook starting...");
-
-  window.onerror = function(message, source, lineno, colno, error) {
-    console.log("⚠️ JS Error:", message, "at line", lineno);
-  };
+    initFlipbook().catch(err => {
+      console.error("Flipbook error:", err);
+      alert("⚠️ Flipbook failed: " + err.message);
+    });
     </script>
-
-
 </body>
 </html>
