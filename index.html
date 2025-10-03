@@ -15,17 +15,46 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
             color: white;
         }
 
         #flipbook {
-            width: 80%;
+            width: 90%;
             height: 90%;
+        }
+        /* Navigation buttons */
+        .nav-btn {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            padding: 10px 15px;
+            cursor: pointer;
+            z-index: 1000;
+            border-radius: 50%;
+        }
+
+        #prevBtn {
+            left: 15px;
+        }
+
+        #nextBtn {
+            right: 15px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
         }
     </style>
 </head>
 <body>
+    <button id="prevBtn" class="nav-btn">⬅</button>
     <div id="flipbook"></div>
+    <button id="nextBtn" class="nav-btn">➡</button>
 
     <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
@@ -37,42 +66,58 @@
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js';
 
-    // 👇 Make sure this file exists in the same folder as index.html
-    const pdfUrl = "Gowell_Catalog.pdf";
+    const pdfUrl = "Gowell_Catalog.pdf"; // make sure this PDF is in same folder
+
+    let flipbook;
 
     async function initFlipbook() {
       try {
         const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
-        let pages = [];
+        let pageImages = [];
 
+        // Render each PDF page as an image
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const viewport = page.getViewport({ scale: 1.5 });
 
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
-          canvas.height = viewport.height;
           canvas.width = viewport.width;
+          canvas.height = viewport.height;
 
           await page.render({ canvasContext: ctx, viewport }).promise;
-
-          // Save page as image
-          pages.push(canvas.toDataURL());
+          pageImages.push(canvas.toDataURL("image/png"));
         }
 
-        // Create flipbook
-        const flipbook = new St.PageFlip(document.getElementById("flipbook"), {
-          width: 800,   // page width
-          height: 600,  // page height
-          size: "stretch",
-          showCover: true,
-          usePortrait: true,
-          autoSize: true
-        });
+        // Initialize flipbook
+        flipbook = new St.PageFlip(
+          document.getElementById("flipbook"),
+          {
+            width: 600,
+            height: 800,
+            size: "stretch",
+            minWidth: 300,
+            maxWidth: 1200,
+            minHeight: 400,
+            maxHeight: 1600,
+            drawShadow: true,
+            flippingTime: 700,
+            usePortrait: true,
+            startPage: 0,
+            showCover: false,
+            autoSize: true
+          }
+        );
 
-        flipbook.loadFromImages(pages);
+        // Load pages
+        flipbook.loadFromImages(pageImages);
+
+        // Navigation button handlers
+        document.getElementById("prevBtn").addEventListener("click", () => flipbook.turnToPrevPage());
+        document.getElementById("nextBtn").addEventListener("click", () => flipbook.turnToNextPage());
+
       } catch (err) {
-        console.error("Error loading PDF:", err);
+        console.error("Flipbook error:", err);
       }
     }
 
