@@ -1,81 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Flipbook with Turn.js</title>
-    <link rel="stylesheet" href="turn.min.css">
-    <style>
-        body {
-            margin: 0;
-            background: #111;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: white;
-        }
+    <title>Flipbook Test</title>
 
-        .controls {
-            margin-top: 15px;
-        }
+    <!-- Load local CSS and JS (instead of broken CDN) -->
+    <link rel="stylesheet" href="pageflip.css">
+    <script src="pageflip.browser.min.js"></script>
 
-        button {
-            padding: 8px 16px;
-            margin: 0 10px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-
-    <div id="flipbook"></div>
-
-    <div class="controls">
-        <button onclick="$('#flipbook').turnPrev()">⬅ Prev</button>
-        <button onclick="$('#flipbook').turnNext()">Next ➡</button>
-    </div>
-
-    <!-- jQuery (Turn.js needs it) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Local Turn.js -->
-    <script src="turn.min.js"></script>
-    <!-- PDF.js -->
+    <!-- PDF.js (from CDN is fine) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
-
-    <script>
-    const pdfjsLib = window['pdfjs-dist/build/pdf'];
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js';
-
-    async function loadPDF() {
-      const pdf = await pdfjsLib.getDocument("Gowell_Catalog.pdf").promise;
-      console.log("PDF loaded with", pdf.numPages, "pages");
-
-      const flipbook = document.getElementById("flipbook");
-
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 1 });
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        await page.render({ canvasContext: ctx, viewport }).promise;
-
-        const pageDiv = document.createElement("div");
-        pageDiv.className = "page";
-        pageDiv.appendChild(canvas);
-        flipbook.appendChild(pageDiv);
-
-        console.log("Rendered page", i);
-      }
-
-      // Initialize our simple turn.js
-      $("#flipbook").turn();
-    }
-
-    loadPDF();
-    </script>
-</body>
-</html>
+</head>
