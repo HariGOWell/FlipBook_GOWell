@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Flipbook Viewer</title>
+    <title>Flipbook Test</title>
     <link rel="stylesheet" href="https://unpkg.com/stpageflip/dist/pageflip.css" />
     <style>
         body {
@@ -33,43 +33,49 @@
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js';
 
-    // ✅ Must match exact filename
-    const pdfUrl = "Gowell_Catalog.pdf";
+    const pdfUrl = "Gowell_Catalog.pdf";  // case-sensitive!
 
     async function initFlipbook() {
-      console.log("Loading PDF:", pdfUrl);
-      const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
-      let pages = [];
+      try {
+        console.log("Loading PDF:", pdfUrl);
+        const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+        console.log("✅ PDF loaded, total pages:", pdf.numPages);
 
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 1.5 });
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        await page.render({ canvasContext: ctx, viewport }).promise;
-        pages.push(canvas.toDataURL());
+        let pages = [];
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 1.5 });
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          pages.push(canvas.toDataURL("image/png"));
+        }
+
+        console.log("✅ All pages rendered:", pages.length);
+
+        // Initialize Flipbook
+        const flipbook = new St.PageFlip(document.getElementById("flipbook"), {
+          width: 800,
+          height: 600,
+          size: "stretch",
+          showCover: false,
+          mobileScrollSupport: true,
+          usePortrait: true,
+          flippingTime: 700
+        });
+
+        flipbook.loadFromImages(pages);
+      } catch (err) {
+        console.error("❌ Flipbook error:", err);
+        alert("⚠️ Flipbook failed: " + err.message);
       }
-
-      console.log("PDF pages rendered:", pages.length);
-
-      const flipbook = new St.PageFlip(document.getElementById("flipbook"), {
-        width: 800,
-        height: 600,
-        size: "stretch",
-        showCover: true,
-        mobileScrollSupport: true, // ✅ mobile touch enabled
-        autoSize: true
-      });
-
-      flipbook.loadFromImages(pages);
     }
 
-    initFlipbook().catch(err => {
-      console.error("Flipbook error:", err);
-      alert("⚠️ Flipbook failed: " + err.message);
-    });
+    initFlipbook();
     </script>
 </body>
 </html>
