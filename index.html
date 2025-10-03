@@ -1,34 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PDF Test</title>
+    <title>GOWell Flipbook</title>
+
+    <!-- Flipbook CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/stpageflip/dist/pageflip.css" />
+
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+
+        #flipbook {
+            width: 80%;
+            height: 90%;
+        }
+    </style>
 </head>
 <body>
-    <canvas id="pdf-canvas"></canvas>
+    <div id="flipbook"></div>
 
+    <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
+    <!-- Flipbook JS -->
+    <script src="https://unpkg.com/stpageflip/dist/pageflip.min.js"></script>
+
     <script>
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js';
 
-    const url = "Gowell_Catalog.pdf"; // rename your file to match this exactly
+    // 👇 Make sure this file exists in the same folder as index.html
+    const pdfUrl = "Gowell_Catalog.pdf";
 
-    pdfjsLib.getDocument(url).promise.then(pdf => {
-      pdf.getPage(1).then(page => {
-        const scale = 1.5;
-        const viewport = page.getViewport({ scale });
-        const canvas = document.getElementById("pdf-canvas");
-        const ctx = canvas.getContext("2d");
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+    async function initFlipbook() {
+      try {
+        const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+        let pages = [];
 
-        page.render({ canvasContext: ctx, viewport });
-      });
-    }).catch(err => {
-      console.error("PDF.js error:", err);
-    });
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 1.5 });
+
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          await page.render({ canvasContext: ctx, viewport }).promise;
+
+          // Save page as image
+          pages.push(canvas.toDataURL());
+        }
+
+        // Create flipbook
+        const flipbook = new St.PageFlip(document.getElementById("flipbook"), {
+          width: 800,   // page width
+          height: 600,  // page height
+          size: "stretch",
+          showCover: true,
+          usePortrait: true,
+          autoSize: true
+        });
+
+        flipbook.loadFromImages(pages);
+      } catch (err) {
+        console.error("Error loading PDF:", err);
+      }
+    }
+
+    initFlipbook();
     </script>
 </body>
 </html>
