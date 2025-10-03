@@ -31,7 +31,7 @@
         }
     </style>
 
-    <!-- jQuery (must come first) -->
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Turn.js -->
@@ -44,44 +44,14 @@
     <div id="flipbook"></div>
 
     <script>
-    const url = "Gowell_Catalog.pdf"; // your PDF file
-    const flipbook = document.getElementById("flipbook");
+    const url = "Gowell_Catalog.pdf"; // Your PDF file
 
     async function loadPDF() {
       const pdf = await pdfjsLib.getDocument(url).promise;
       console.log("PDF loaded with", pdf.numPages, "pages");
 
+      const pages = [];
+
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 1.5 });
-
-        // create a container div for turn.js
-        const pageDiv = document.createElement("div");
-        pageDiv.className = "page";
-
-        // create canvas for pdf.js
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-
-        await page.render({ canvasContext: context, viewport: viewport }).promise;
-
-        pageDiv.appendChild(canvas);
-        flipbook.appendChild(pageDiv);
-
-        console.log("Rendered page", i);
-      }
-
-      // 🔥 Initialize Turn.js after all pages are loaded
-      $("#flipbook").turn({
-        width: 800,
-        height: 600,
-        autoCenter: true
-      });
-    }
-
-    loadPDF();
-    </script>
-</body>
-</html>
+        const viewport = page.getV
